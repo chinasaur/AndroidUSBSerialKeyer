@@ -6,10 +6,10 @@
 
 #include <vector>
 #include <oboe/Oboe.h>
-#include "Oscillator.h"
+#include "SidetoneOscillator.h"
 
 
-class DataCallback : public oboe::AudioStreamDataCallback {
+class SidetoneCallback : public oboe::AudioStreamDataCallback {
 public:
     oboe::DataCallbackResult onAudioReady(
             oboe::AudioStream *oboeStream, void *audioData, int32_t numFrames) override {
@@ -18,16 +18,16 @@ public:
             mIsThreadAffinitySet = true;
         }
 
-        float* outputBuffer = static_cast<float*>(audioData);
         if (!mOscillator) {
             LOGE("Renderable source not set!");
             return oboe::DataCallbackResult::Stop;
         }
+        float* outputBuffer = static_cast<float*>(audioData);
         mOscillator->renderAudio(outputBuffer, numFrames);
         return oboe::DataCallbackResult::Continue;
     }
 
-    void setSource(std::shared_ptr<Oscillator> oscillator) {
+    void setSource(std::shared_ptr<SidetoneOscillator> oscillator) {
         mOscillator = oscillator;
     }
 
@@ -37,7 +37,7 @@ public:
     }
 
 private:
-    std::shared_ptr<Oscillator> mOscillator;
+    std::shared_ptr<SidetoneOscillator> mOscillator;
     std::vector<int> mCpuIds; // IDs of CPU cores which the audio callback should be bound to
     std::atomic<bool> mIsThreadAffinityEnabled { false };
     std::atomic<bool> mIsThreadAffinitySet { false };
@@ -83,15 +83,15 @@ public:
     ~SidetoneEngine() = default;
     oboe::Result start(oboe::AudioApi audio_api, int32_t device_id, float frequency);
     oboe::Result stop();
-    void play_tone();
-    void stop_tone();
+    void playSidetone();
+    void playSilence();
 
 private:
     oboe::Result openPlaybackStream(int32_t device_id, oboe::AudioApi audio_api);
 
     std::shared_ptr<oboe::AudioStream> mStream;
-    std::shared_ptr<Oscillator> mAudioSource;
-    std::shared_ptr<DataCallback> mDataCallback;
+    std::shared_ptr<SidetoneOscillator> mAudioSource;
+    std::shared_ptr<SidetoneCallback> mDataCallback;
     std::mutex mLock;
 };
 

@@ -8,7 +8,7 @@ static SidetoneEngine sidetoneEngine;
 extern "C" {
 
 JNIEXPORT void JNICALL
-Java_net_arrl_k6pli_usbkeyeroboejava_PlaybackEngine_setDefaultStreamValues(
+Java_net_arrl_k6pli_usbkeyeroboejava_SidetoneEngine_setDefaultStreamValues(
         JNIEnv *env,
         jclass,
         jint sampleRate,
@@ -18,7 +18,7 @@ Java_net_arrl_k6pli_usbkeyeroboejava_PlaybackEngine_setDefaultStreamValues(
 }
 
 JNIEXPORT jint JNICALL
-Java_net_arrl_k6pli_usbkeyeroboejava_PlaybackEngine_startEngine(
+Java_net_arrl_k6pli_usbkeyeroboejava_SidetoneEngine_startEngine(
         JNIEnv *env,
         jclass,
         int audioApi, int deviceId, float frequency) {
@@ -26,25 +26,25 @@ Java_net_arrl_k6pli_usbkeyeroboejava_PlaybackEngine_startEngine(
 }
 
 JNIEXPORT jint JNICALL
-Java_net_arrl_k6pli_usbkeyeroboejava_PlaybackEngine_stopEngine(
+Java_net_arrl_k6pli_usbkeyeroboejava_SidetoneEngine_stopEngine(
         JNIEnv *env,
         jclass) {
     return static_cast<jint>(sidetoneEngine.stop());
 }
 
 JNIEXPORT void JNICALL
-Java_net_arrl_k6pli_usbkeyeroboejava_PlaybackEngine_playTone(
+Java_net_arrl_k6pli_usbkeyeroboejava_SidetoneEngine_playSidetone(
         JNIEnv *env,
         jclass,
         jboolean isToneOn) {
-    sidetoneEngine.play_tone();
+    sidetoneEngine.playSidetone();
 }
 JNIEXPORT void JNICALL
-Java_net_arrl_k6pli_usbkeyeroboejava_PlaybackEngine_stopTone(
+Java_net_arrl_k6pli_usbkeyeroboejava_SidetoneEngine_playSilence(
         JNIEnv *env,
         jclass,
         jboolean isToneOn) {
-    sidetoneEngine.stop_tone();
+    sidetoneEngine.playSilence();
 }
 
 }

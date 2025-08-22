@@ -7,7 +7,7 @@
 #include "logging_macros.h"
 
 
-SidetoneEngine::SidetoneEngine() : mDataCallback(std::make_shared<DataCallback>()) {}
+SidetoneEngine::SidetoneEngine() : mDataCallback(std::make_shared<SidetoneCallback>()) {}
 
 oboe::Result SidetoneEngine::openPlaybackStream(int32_t device_id, oboe::AudioApi audio_api) {
     oboe::AudioStreamBuilder builder;
@@ -40,7 +40,7 @@ oboe::Result SidetoneEngine::start(oboe::AudioApi audio_api, int32_t device_id, 
                  mStream->getAudioApi(),
                  mStream->getDeviceId());
 
-            mAudioSource = std::make_shared<Oscillator>();
+            mAudioSource = std::make_shared<SidetoneOscillator>();
             mAudioSource->setSampleRate(mStream->getSampleRate());
             mAudioSource->setFrequency(frequency);
             mAudioSource->setAmplitude(1.f);
@@ -72,10 +72,10 @@ oboe::Result SidetoneEngine::stop() {
     return result;
 }
 
-void SidetoneEngine::play_tone() {
+void SidetoneEngine::playSidetone() {
     if (mAudioSource) mAudioSource->setWaveOn(true);
 }
 
-void SidetoneEngine::stop_tone() {
+void SidetoneEngine::playSilence() {
     if (mAudioSource) mAudioSource->setWaveOn(false);
 }
