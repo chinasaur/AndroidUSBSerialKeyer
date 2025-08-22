@@ -16,6 +16,9 @@ android {
         externalNativeBuild {
             cmake {
                 arguments '-DANDROID_STL=c++_shared'
+                // https://developer.android.com/guide/practices/page-sizes#build
+                // For NDK <= r27
+                arguments '-DANDROID_SUPPORT_FLEXIBLE_PAGE_SIZES=ON'
             }
         }
 
