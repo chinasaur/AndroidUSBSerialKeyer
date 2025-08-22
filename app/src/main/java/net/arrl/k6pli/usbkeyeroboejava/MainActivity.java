@@ -20,6 +20,7 @@ import com.hoho.android.usbserial.driver.UsbSerialProber;
 
 import net.arrl.k6pli.usbkeyeroboejava.databinding.ActivityMainBinding;
 
+import java.io.IOException;
 import java.util.List;
 
 class SidetoneEngine {
@@ -48,6 +49,8 @@ public class MainActivity extends AppCompatActivity {
     private static final String TAG = "USBKeyer";
     private static final String ACTION_USB_PERMISSION = "net.arrl.k6pli.usbkeyeroboejava.USB_PERMISSION";
     private ActivityMainBinding binding;
+    private UsbDeviceConnection usbConnection = null;
+    private UsbSerialPort serialPort = null;
 
     @SuppressLint("ClickableViewAccessibility")
     @Override
@@ -63,9 +66,23 @@ public class MainActivity extends AppCompatActivity {
                 switch (event.getAction()) {
                     case (MotionEvent.ACTION_DOWN):
                         SidetoneEngine.playSidetone();
+                        if (serialPort != null && serialPort.isOpen()) {
+                            try {
+                                serialPort.setDTR(true);
+                            } catch (IOException e) {
+                                throw new RuntimeException(e);
+                            }
+                        }
                         break;
                     case (MotionEvent.ACTION_UP):
                         SidetoneEngine.playSilence();
+                        if (serialPort != null && serialPort.isOpen()) {
+                            try {
+                                serialPort.setDTR(false);
+                            } catch (IOException e) {
+                                throw new RuntimeException(e);
+                            }
+                        }
                         break;
                 }
                 return true;  // Event consumed.
@@ -78,22 +95,54 @@ public class MainActivity extends AppCompatActivity {
         super.onResume();
         SidetoneEngine.setDefaultStreamValues(this);
         SidetoneEngine.startEngine(
-                0,  // Unspecified; pick the best available API
-                0,  // Unspecified; pick the first available device
+                0, 0,  // Unspecified; pick the best API and OS default audio device.
                 700.f);
 
         // Find all available drivers from attached devices.
         UsbManager manager = (UsbManager) getSystemService(Context.USB_SERVICE);
         List<UsbSerialDriver> availableDrivers = UsbSerialProber.getDefaultProber().findAllDrivers(manager);
         if (availableDrivers.isEmpty()) {
-            Log.i(TAG, "No USB devices found");
             return;
         }
+        // Open a connection to the first available driver.
+        UsbSerialDriver driver = availableDrivers.get(0);
+        PendingIntent permissionIntent = PendingIntent.getBroadcast(
+                this, 0, new Intent(ACTION_USB_PERMISSION), PendingIntent.FLAG_IMMUTABLE);
+        manager.requestPermission(driver.getDevice(), permissionIntent);
+        usbConnection = manager.openDevice(driver.getDevice());
+        if (usbConnection == null) {
+            Log.w(TAG, "USB connection permission not granted");
+            return;
+        }
+        // Open serial port.
+        serialPort = driver.getPorts().get(0); // Most devices have just one port (port 0)
+        try {
+            serialPort.open(usbConnection);
+            serialPort.setParameters(115200, 8, UsbSerialPort.STOPBITS_1, UsbSerialPort.PARITY_NONE);
+            serialPort.setDTR(false);
+            serialPort.setRTS(false);
+        } catch (IOException e) {
+            Log.w(TAG, "Open serial port failed.");
+            return;
+        }
+        Log.i(TAG, "Serial port ready.");
     }
 
     @Override
     protected void onPause() {
         SidetoneEngine.stopEngine();
+        if (serialPort != null) {
+            try {
+                serialPort.close();
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+            serialPort = null;
+        }
+        if (usbConnection != null) {
+            usbConnection.close();
+            usbConnection = null;
+        }
         super.onPause();
     }
 }
