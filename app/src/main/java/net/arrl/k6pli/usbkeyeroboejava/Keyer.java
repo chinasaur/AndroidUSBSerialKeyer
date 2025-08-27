@@ -9,16 +9,16 @@ import net.arrl.k6pli.usbkeyeroboejava.databinding.ActivityMainBinding;
 
 
 abstract public class Keyer implements Runnable {
-    public static Keyer straightKey(UsbSerialManager usbSerialManager) {
-        return new StraightKey(usbSerialManager);
-    }
-
-    public static Keyer bug(UsbSerialManager usbSerialManager, float wordsPerMinute) {
-        return new Bug(usbSerialManager, wordsPerMinute);
-    }
-
-    public static Keyer iambicA(UsbSerialManager usbSerialManager, float wordsPerMinute) {
-        return new IambicA(usbSerialManager, wordsPerMinute);
+    public static Keyer buildKeyer(
+            ActivityMainBinding binding, UsbSerialManager usbSerialManager, int wordsPerMinute) {
+        final int checkedId = binding.rgKeyerType.getCheckedRadioButtonId();
+        if (checkedId == R.id.rbStraightKey) {
+            return new StraightKey(usbSerialManager);
+        } else if (checkedId == R.id.rbIambicA) {
+            return new IambicA(usbSerialManager, wordsPerMinute);
+        } else {
+            return new StraightKey(usbSerialManager);
+        }
     }
 
     private final UsbSerialManager usbSerialManager;
@@ -107,7 +107,7 @@ abstract class PaddleKeyer extends Keyer {
     protected long stateHoldUntilNanoTime = 0;
     protected KeyState keyState = KeyState.IDLE;
 
-    public PaddleKeyer(UsbSerialManager usbSerialManager, float wordsPerMinute) {
+    public PaddleKeyer(UsbSerialManager usbSerialManager, int wordsPerMinute) {
         super(usbSerialManager);
         this.ditLengthNanos = (long) (1200.f / wordsPerMinute * 1e6);
     }
@@ -167,7 +167,7 @@ abstract class PaddleKeyer extends Keyer {
 
 
 class Bug extends PaddleKeyer {
-    public Bug(UsbSerialManager usbSerialManager, float wordsPerMinute) {
+    public Bug(UsbSerialManager usbSerialManager, int wordsPerMinute) {
         super(usbSerialManager, wordsPerMinute);
     }
 
@@ -226,7 +226,7 @@ class IambicA extends PaddleKeyer {
     private boolean ditMemory = false;
     private boolean dahMemory = false;
 
-    public IambicA(UsbSerialManager usbSerialManager, float wordsPerMinute) {
+    public IambicA(UsbSerialManager usbSerialManager, int wordsPerMinute) {
         super(usbSerialManager, wordsPerMinute);
     }
 

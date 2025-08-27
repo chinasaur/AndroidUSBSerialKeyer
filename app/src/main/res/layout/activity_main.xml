@@ -9,7 +9,7 @@
     <Button
         android:id="@+id/bStraightKey"
         android:layout_width="0dp"
-        android:layout_height="196dp"
+        android:layout_height="0dp"
         android:layout_marginStart="16dp"
         android:layout_marginEnd="16dp"
         android:layout_marginBottom="32dp"
@@ -21,15 +21,17 @@
         app:iconPadding="0dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHeight_percent="0.25"
         app:layout_constraintStart_toStartOf="parent" />
 
     <Button
         android:id="@+id/bLeftPaddle"
         style="@style/Paddle"
         android:layout_width="0dp"
-        android:layout_height="196dp"
+        android:layout_height="0dp"
         android:layout_marginStart="16dp"
         android:layout_marginEnd="12dp"
+
         android:layout_marginBottom="32dp"
         android:contentDescription="leftPaddle"
         android:insetTop="0dp"
@@ -39,6 +41,7 @@
         app:iconPadding="0dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@+id/bRightPaddle"
+        app:layout_constraintHeight_percent="0.25"
         app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent"
         tools:text="." />
@@ -47,7 +50,7 @@
         android:id="@+id/bRightPaddle"
         style="@style/Paddle"
         android:layout_width="0dp"
-        android:layout_height="196dp"
+        android:layout_height="0dp"
         android:layout_marginStart="12dp"
         android:layout_marginEnd="16dp"
         android:layout_marginBottom="32dp"
@@ -60,8 +63,79 @@
         app:iconPadding="0dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHeight_percent="0.25"
         app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toEndOf="@+id/bLeftPaddle"
         tools:text="-" />
+
+    <LinearLayout
+        android:id="@+id/llKeyerType"
+        android:layout_width="0dp"
+        android:layout_height="160dp"
+        android:layout_marginTop="64dp"
+        android:orientation="vertical"
+        app:layout_constraintEnd_toEndOf="@+id/bStraightKey"
+        app:layout_constraintStart_toStartOf="@+id/bStraightKey"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <TextView
+            android:id="@+id/tvKeyerType"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Keyer Type"
+            android:textSize="20sp" />
+
+        <RadioGroup
+            android:id="@+id/rgKeyerType"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:checkedButton="@+id/rbStraightKey">
+
+            <RadioButton
+                android:id="@+id/rbStraightKey"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Straight Key" />
+
+            <RadioButton
+                android:id="@+id/rbIambicA"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Iambic A Paddle" />
+        </RadioGroup>
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/llWPM"
+        android:layout_width="0dp"
+        android:layout_height="160dp"
+        android:orientation="vertical"
+        android:visibility="invisible"
+        app:layout_constraintEnd_toEndOf="@+id/bStraightKey"
+        app:layout_constraintStart_toStartOf="@+id/bStraightKey"
+        app:layout_constraintTop_toBottomOf="@+id/llKeyerType">
+
+        <TextView
+            android:id="@+id/tvKeyingSpeed"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Keying Speed"
+            android:textSize="20sp" />
+
+        <SeekBar
+            android:id="@+id/sbWPM"
+            style="@style/Widget.AppCompat.SeekBar"
+            android:layout_width="match_parent"
+            android:layout_height="37dp"
+            android:max="40"
+            android:progress="20" />
+
+        <TextView
+            android:id="@+id/tvWPM"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:text="20 WPM" />
+    </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
