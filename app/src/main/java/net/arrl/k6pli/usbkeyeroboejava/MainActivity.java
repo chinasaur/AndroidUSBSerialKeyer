@@ -27,6 +27,10 @@ public class MainActivity extends AppCompatActivity {
 
     private void clearButtons() {
         binding.bStraightKey.setVisibility(View.INVISIBLE);
+        binding.bLeftPaddle.setVisibility(View.INVISIBLE);
+        binding.bRightPaddle.setVisibility(View.INVISIBLE);
+        binding.bLeftPaddle.setText("");
+        binding.bRightPaddle.setText("");
     }
 
     @Override
@@ -39,7 +43,7 @@ public class MainActivity extends AppCompatActivity {
         usbSerialManager.open();
 
         clearButtons();
-        keyer = Keyer.straightKey(usbSerialManager);
+        keyer = Keyer.bug(usbSerialManager, 20.f);
         keyer.setupButtons(binding);
         new Thread(keyer).start();
     }
