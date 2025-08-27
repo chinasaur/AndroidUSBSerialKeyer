@@ -17,6 +17,10 @@ abstract public class Keyer implements Runnable {
         return new Bug(usbSerialManager, wordsPerMinute);
     }
 
+    public static Keyer iambicA(UsbSerialManager usbSerialManager, float wordsPerMinute) {
+        return new IambicA(usbSerialManager, wordsPerMinute);
+    }
+
     private final UsbSerialManager usbSerialManager;
 
     public Keyer(UsbSerialManager usbSerialManager) {
@@ -204,6 +208,84 @@ class Bug extends PaddleKeyer {
                 case SPACE_AFTER_DAH:
                     if (System.nanoTime() > stateHoldUntilNanoTime) {
                         keyState = KeyState.IDLE;
+                    }
+                    break;
+            }
+
+            try {
+                Thread.sleep(0, 10 * 1000);  // Sleep 10 us.
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+        }
+    }
+}
+
+
+class IambicA extends PaddleKeyer {
+    private boolean ditMemory = false;
+    private boolean dahMemory = false;
+
+    public IambicA(UsbSerialManager usbSerialManager, float wordsPerMinute) {
+        super(usbSerialManager, wordsPerMinute);
+    }
+
+    @Override
+    public void run() {
+        while (keepRunning) {
+            switch (keyState) {
+                case IDLE:
+                    if (ditOn) {
+                        keyDown();
+                        keyState = KeyState.DIT;
+                        stateHoldUntilNanoTime = System.nanoTime() + ditLengthNanos;
+                    }
+                    if (dahOn) {
+                        keyDown();
+                        keyState = KeyState.DAH;
+                        stateHoldUntilNanoTime = System.nanoTime() + 3 * ditLengthNanos;
+                    }
+                    break;
+                case DIT:
+                    if (dahOn) dahMemory = true;
+                    if (System.nanoTime() > stateHoldUntilNanoTime) {
+                        keyUp();
+                        keyState = KeyState.SPACE_AFTER_DIT;
+                        stateHoldUntilNanoTime = System.nanoTime() + ditLengthNanos;
+                    }
+                    break;
+                case DAH:
+                    if (ditOn) ditMemory = true;
+                    if (System.nanoTime() > stateHoldUntilNanoTime) {
+                        keyUp();
+                        keyState = KeyState.SPACE_AFTER_DAH;
+                        stateHoldUntilNanoTime = System.nanoTime() + ditLengthNanos;
+                    }
+                    break;
+                case SPACE_AFTER_DIT:
+                    if (dahOn) dahMemory = true;
+                    if (System.nanoTime() > stateHoldUntilNanoTime) {
+                        if (dahMemory) {
+                            keyDown();
+                            dahMemory = false;
+                            keyState = KeyState.DAH;
+                            stateHoldUntilNanoTime = System.nanoTime() + 3 * ditLengthNanos;
+                        } else {
+                            keyState = KeyState.IDLE;
+                        }
+                    }
+                    break;
+                case SPACE_AFTER_DAH:
+                    if (ditOn) ditMemory = true;
+                    if (System.nanoTime() > stateHoldUntilNanoTime) {
+                        if (ditMemory) {
+                            keyDown();
+                            ditMemory = false;
+                            keyState = KeyState.DIT;
+                            stateHoldUntilNanoTime = System.nanoTime() + ditLengthNanos;
+                        } else {
+                            keyState = KeyState.IDLE;
+                        }
                     }
                     break;
             }

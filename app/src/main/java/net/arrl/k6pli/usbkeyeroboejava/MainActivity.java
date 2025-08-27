@@ -43,7 +43,7 @@ public class MainActivity extends AppCompatActivity {
         usbSerialManager.open();
 
         clearButtons();
-        keyer = Keyer.bug(usbSerialManager, 20.f);
+        keyer = Keyer.iambicA(usbSerialManager, 20.f);
         keyer.setupButtons(binding);
         new Thread(keyer).start();
     }
