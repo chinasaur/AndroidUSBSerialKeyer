@@ -1,6 +1,6 @@
 # TL;DR
 Provides a simple Android app for Morse code / CW keying.
-My main goal was to provide iambic keying on the Quansheng UV-K5 with IJV 2.9R5 firmware for 2m/70cm CW.
+My main goal was to provide iambic keying on the Quansheng UV-K5 with [IJV 2.9R5](https://www.universirius.com/en_gb/preppers/quansheng-uv-k5-manuale-del-firmware-ijv_2-9r5/) firmware for 2m/70cm CW.
 This app connects to the Quansheng via an [All-In-One-Cable (AIOC)](https://github.com/skuep/AIOC) as the hardware intermediary.
 It may work to use this as a backup key with other rigs, with an appropriate custom cable.
 It can also be used as a practice sidetone oscillator.
