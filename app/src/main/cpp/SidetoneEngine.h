@@ -90,7 +90,7 @@ private:
 };
 
 
-class SidetoneEngine {
+class SidetoneEngine : public oboe::AudioStreamErrorCallback {
 public:
     SidetoneEngine();
     ~SidetoneEngine() = default;
@@ -99,6 +99,8 @@ public:
     void playSidetone();
     void playSilence();
 
+    void onErrorAfterClose(oboe::AudioStream *oboeStream, oboe::Result error) override;
+
 private:
     oboe::Result openPlaybackStream(int32_t device_id, oboe::AudioApi audio_api);
 
@@ -106,6 +108,10 @@ private:
     std::shared_ptr<SidetoneOscillator> mAudioSource;
     std::shared_ptr<SidetoneCallback> mDataCallback;
     std::mutex mLock;
+
+    float mFrequency = 700.0f;
+    oboe::AudioApi mAudioApi = oboe::AudioApi::Unspecified;
+    int32_t mDeviceId = 0;
 };
 
 #endif //USBKEYEROBOEJAVA_SIDETONEENGINE_H

@@ -24,6 +24,12 @@ public class SidetoneEngine {
         System.loadLibrary("usbkeyeroboejava");
     }
 
+    private static boolean sidetoneEnabled = true;
+
+    public static void setSidetoneEnabled(boolean enabled) {
+        sidetoneEnabled = enabled;
+    }
+
     static void setDefaultStreamValues(Context context) {
         AudioManager myAudioMgr = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
         String sampleRateStr = myAudioMgr.getProperty(AudioManager.PROPERTY_OUTPUT_SAMPLE_RATE);
@@ -33,9 +39,19 @@ public class SidetoneEngine {
         setDefaultStreamValues(defaultSampleRate, defaultFramesPerBurst);
     }
 
+    static void playSidetone() {
+        if (sidetoneEnabled) {
+            playSidetoneNative();
+        }
+    }
+
+    static void playSilence() {
+        playSilenceNative();
+    }
+
     static native void setDefaultStreamValues(int sampleRate, int framesPerBurst);
     static native int startEngine(int audioApi, int deviceId, float frequency);
     static native int stopEngine();
-    static native void playSidetone();
-    static native void playSilence();
+    private static native void playSidetoneNative();
+    private static native void playSilenceNative();
 }

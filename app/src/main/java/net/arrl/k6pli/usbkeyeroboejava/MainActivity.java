@@ -32,7 +32,7 @@ import android.widget.SeekBar;
 
 import net.arrl.k6pli.usbkeyeroboejava.databinding.ActivityMainBinding;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements SharedPreferences.OnSharedPreferenceChangeListener {
 //    private static final String TAG = "K6PLI Keyer";
     private SharedPreferences sharedPrefs;
     private ActivityMainBinding binding;
@@ -46,7 +46,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView(binding.getRoot());
 
         sharedPrefs = PreferenceManager.getDefaultSharedPreferences(this);
-        usbSerialManager = new UsbSerialManager(this);
+        usbSerialManager = UsbSerialManager.getInstance(this);
         setupKeyerControls();
     }
 
@@ -123,21 +123,26 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
+        sharedPrefs.registerOnSharedPreferenceChangeListener(this);
         SidetoneEngine.setDefaultStreamValues(this);
         SidetoneEngine.startEngine(
                 0, 0,  // Unspecified; pick the best API and OS default audio device.
                 700.f);
+        usbSerialManager.registerReceiver();
         usbSerialManager.open();
         refreshUiFromPrefs();
         setupKeyer();
+        updateSidetoneState();
     }
 
     @Override
     protected void onPause() {
+        sharedPrefs.unregisterOnSharedPreferenceChangeListener(this);
         SidetoneEngine.stopEngine();
         if (keyer != null) {
             keyer.stop();
         }
+        usbSerialManager.unregisterReceiver();
         usbSerialManager.close();
         super.onPause();
     }
@@ -151,6 +156,34 @@ public class MainActivity extends AppCompatActivity {
         keyer = Keyer.buildKeyer(selectedValue, usbSerialManager, binding.sbWPM.getProgress());
         keyer.setupButtons(binding);
         new Thread(keyer).start();
+    }
+
+    private void updateSidetoneState() {
+        String mode = sharedPrefs.getString("sidetone_mode", "auto");
+        boolean enabled;
+        switch (mode) {
+            case "on":
+                enabled = true;
+                break;
+            case "off":
+                enabled = false;
+                break;
+            case "auto":
+            default:
+                enabled = !usbSerialManager.isConnected();
+                break;
+        }
+        SidetoneEngine.setSidetoneEnabled(enabled);
+    }
+
+    @Override
+    public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+        if ("sidetone_mode".equals(key)) {
+            updateSidetoneState();
+        } else if ("usb_device".equals(key)) {
+            usbSerialManager.open();
+            updateSidetoneState();
+        }
     }
 
     @Override

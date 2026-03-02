@@ -1,3 +1,15 @@
 <resources>
     <string name="app_name">K6PLI Keyer</string>
+
+    <string-array name="sidetone_modes">
+        <item>On</item>
+        <item>Off</item>
+        <item>Auto: on unless USB serial connected</item>
+    </string-array>
+
+    <string-array name="sidetone_modes_values">
+        <item>on</item>
+        <item>off</item>
+        <item>auto</item>
+    </string-array>
 </resources>

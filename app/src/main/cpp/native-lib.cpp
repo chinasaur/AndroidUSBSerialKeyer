@@ -49,17 +49,16 @@ Java_net_arrl_k6pli_usbkeyeroboejava_SidetoneEngine_stopEngine(
 }
 
 JNIEXPORT void JNICALL
-Java_net_arrl_k6pli_usbkeyeroboejava_SidetoneEngine_playSidetone(
+Java_net_arrl_k6pli_usbkeyeroboejava_SidetoneEngine_playSidetoneNative(
         JNIEnv *env,
-        jclass,
-        jboolean isToneOn) {
+        jclass) {
     sidetoneEngine.playSidetone();
 }
+
 JNIEXPORT void JNICALL
-Java_net_arrl_k6pli_usbkeyeroboejava_SidetoneEngine_playSilence(
+Java_net_arrl_k6pli_usbkeyeroboejava_SidetoneEngine_playSilenceNative(
         JNIEnv *env,
-        jclass,
-        jboolean isToneOn) {
+        jclass) {
     sidetoneEngine.playSilence();
 }
 

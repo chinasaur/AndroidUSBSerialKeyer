@@ -242,7 +242,8 @@ class Bug extends PaddleKeyer {
             try {
                 Thread.sleep(0, 10 * 1000);  // Sleep 10 us.
             } catch (InterruptedException e) {
-                throw new RuntimeException(e);
+                Thread.currentThread().interrupt();
+                return;
             }
         }
     }
@@ -320,7 +321,8 @@ class IambicA extends PaddleKeyer {
             try {
                 Thread.sleep(0, 10 * 1000);  // Sleep 10 us.
             } catch (InterruptedException e) {
-                throw new RuntimeException(e);
+                Thread.currentThread().interrupt();
+                return;
             }
         }
     }

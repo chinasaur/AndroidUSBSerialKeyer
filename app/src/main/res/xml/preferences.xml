@@ -1,4 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PreferenceScreen xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <PreferenceCategory app:title="Hardware Settings">
+        <ListPreference
+            app:key="usb_device"
+            app:title="USB Serial Device"
+            app:summary="Select a USB device for keying output"
+            app:useSimpleSummaryProvider="true" />
+    </PreferenceCategory>
+
+    <PreferenceCategory app:title="Local Sidetone Settings">
+        <ListPreference
+            app:key="sidetone_mode"
+            app:title="Sidetone Mode"
+            app:entries="@array/sidetone_modes"
+            app:entryValues="@array/sidetone_modes_values"
+            android:defaultValue="auto"
+            app:useSimpleSummaryProvider="true" />
+    </PreferenceCategory>
+
 </PreferenceScreen>

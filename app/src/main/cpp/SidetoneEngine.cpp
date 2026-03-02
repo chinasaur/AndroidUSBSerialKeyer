@@ -15,6 +15,7 @@
  *
  */
 #include <vector>
+#include <unistd.h>
 
 #include "SidetoneEngine.h"
 #include "logging_macros.h"
@@ -29,7 +30,7 @@ oboe::Result SidetoneEngine::openPlaybackStream(int32_t device_id, oboe::AudioAp
             ->setFormat(oboe::AudioFormat::Float)
             ->setFormatConversionAllowed(true)
             ->setDataCallback(mDataCallback)
-//            ->setErrorCallback(mErrorCallback)
+            ->setErrorCallback(this)
             ->setAudioApi(audio_api)
             ->setChannelCount(1)
             ->setDeviceId(device_id)
@@ -38,6 +39,11 @@ oboe::Result SidetoneEngine::openPlaybackStream(int32_t device_id, oboe::AudioAp
 
 oboe::Result SidetoneEngine::start(oboe::AudioApi audio_api, int32_t device_id, float frequency) {
     std::lock_guard<std::mutex> lock(mLock);
+
+    mAudioApi = audio_api;
+    mDeviceId = device_id;
+    mFrequency = frequency;
+
     oboe::Result result;
     // It is possible for a stream's device to become disconnected during the open or between
     // the Open and the Start.
@@ -91,4 +97,11 @@ void SidetoneEngine::playSidetone() {
 
 void SidetoneEngine::playSilence() {
     if (mAudioSource) mAudioSource->setWaveOn(false);
+}
+
+void SidetoneEngine::onErrorAfterClose(oboe::AudioStream *oboeStream, oboe::Result error) {
+    if (error == oboe::Result::ErrorDisconnected) {
+        LOGI("Audio device disconnected, restarting stream");
+        start(mAudioApi, mDeviceId, mFrequency);
+    }
 }
