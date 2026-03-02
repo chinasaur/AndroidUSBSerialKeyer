@@ -2,9 +2,7 @@ package net.arrl.k6pli.usbkeyeroboejava;
 
 import android.hardware.usb.UsbDevice;
 import android.os.Bundle;
-import android.text.InputType;
 
-import androidx.preference.EditTextPreference;
 import androidx.preference.ListPreference;
 import androidx.preference.PreferenceFragmentCompat;
 
@@ -25,7 +23,7 @@ public class SettingsFragment extends PreferenceFragmentCompat {
             // Lazy population: refresh the list every time the user clicks to open the selection
             usbDevicePref.setOnPreferenceClickListener(preference -> {
                 updateUsbDeviceList(usbDevicePref);
-                return false; // Return false to allow the normal click behavior (opening the dialog)
+                return false;
             });
 
             usbDevicePref.setOnPreferenceChangeListener((preference, newValue) -> {
@@ -35,11 +33,6 @@ public class SettingsFragment extends PreferenceFragmentCompat {
                 if (VALUE_DISABLED.equals(deviceName)) {
                     usbManager.close();
                     return true;
-                }
-                
-                // If it's our placeholder "No devices found" value, reject the selection
-                if (deviceName == null || deviceName.isEmpty()) {
-                    return false;
                 }
                 
                 List<UsbSerialDriver> drivers = usbManager.getAvailableDrivers();
@@ -55,14 +48,6 @@ public class SettingsFragment extends PreferenceFragmentCompat {
             
             // Initial population to ensure correct summary/state when the fragment is created
             updateUsbDeviceList(usbDevicePref);
-        }
-
-        EditTextPreference frequencyPref = findPreference("sidetone_frequency");
-        if (frequencyPref != null) {
-            frequencyPref.setOnBindEditTextListener(editText -> {
-                editText.setInputType(InputType.TYPE_CLASS_NUMBER);
-                editText.selectAll();
-            });
         }
     }
 

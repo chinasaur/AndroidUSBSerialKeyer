@@ -48,7 +48,7 @@ public class UsbSerialManager {
     private UsbSerialPort serialPort = null;
     private boolean receiverRegistered = false;
 
-    private final BroadcastReceiver usbPermissionReceiver = new BroadcastReceiver() {
+    private final BroadcastReceiver usbReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
             String action = intent.getAction();
@@ -58,12 +58,19 @@ public class UsbSerialManager {
                     if (intent.getBooleanExtra(UsbManager.EXTRA_PERMISSION_GRANTED, false)) {
                         if (device != null) {
                             Log.d(TAG, "Permission granted for device " + device.getDeviceName());
-                            // Try to open the device now that we have permission
                             openByDevice(device);
                         }
                     } else {
                         Log.d(TAG, "Permission denied for device " + device);
                     }
+                }
+            } else if (UsbManager.ACTION_USB_DEVICE_DETACHED.equals(action)) {
+                UsbDevice device = intent.getParcelableExtra(UsbManager.EXTRA_DEVICE);
+                if (device != null && serialPort != null && device.equals(serialPort.getDriver().getDevice())) {
+                    Log.d(TAG, "USB device detached: " + device.getDeviceName());
+                    close();
+                    SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+                    prefs.edit().putString("usb_device", VALUE_DISABLED).apply();
                 }
             }
         }
@@ -82,11 +89,14 @@ public class UsbSerialManager {
 
     public void registerReceiver() {
         if (!receiverRegistered) {
-            IntentFilter filter = new IntentFilter(ACTION_USB_PERMISSION);
+            IntentFilter filter = new IntentFilter();
+            filter.addAction(ACTION_USB_PERMISSION);
+            filter.addAction(UsbManager.ACTION_USB_DEVICE_DETACHED);
+            
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                context.registerReceiver(usbPermissionReceiver, filter, Context.RECEIVER_NOT_EXPORTED);
+                context.registerReceiver(usbReceiver, filter, Context.RECEIVER_NOT_EXPORTED);
             } else {
-                context.registerReceiver(usbPermissionReceiver, filter);
+                context.registerReceiver(usbReceiver, filter);
             }
             receiverRegistered = true;
         }
@@ -94,7 +104,7 @@ public class UsbSerialManager {
 
     public void unregisterReceiver() {
         if (receiverRegistered) {
-            context.unregisterReceiver(usbPermissionReceiver);
+            context.unregisterReceiver(usbReceiver);
             receiverRegistered = false;
         }
     }
@@ -107,13 +117,10 @@ public class UsbSerialManager {
     protected void open() {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
         String preferredDeviceName = prefs.getString("usb_device", null);
-        
-        // If disabled or no selection, ensure we are closed
         if (VALUE_DISABLED.equals(preferredDeviceName) || preferredDeviceName == null) {
             close();
             return;
         }
-
         List<UsbSerialDriver> drivers = getAvailableDrivers();
         if (drivers.isEmpty()) {
             close();
@@ -127,12 +134,9 @@ public class UsbSerialManager {
                 break;
             }
         }
-
-        // Fallback to first available if preferred not found
         if (driverToOpen == null) {
             driverToOpen = drivers.get(0);
         }
-
         open(driverToOpen);
     }
 
@@ -153,13 +157,17 @@ public class UsbSerialManager {
 
         if (!manager.hasPermission(device)) {
             Log.d(TAG, "Requesting permission for device " + device.getDeviceName());
-            // Use FLAG_MUTABLE as some UsbManager implementations need to modify the Intent
+            // Use FLAG_MUTABLE as UsbManager needs to modify the Intent (fill extras)
+            // For Android 14+ (API 34), FLAG_MUTABLE with implicit Intent is disallowed.
+            // We make the intent explicit by setting the package.
             int flags = PendingIntent.FLAG_UPDATE_CURRENT;
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
                 flags |= PendingIntent.FLAG_MUTABLE;
             }
+            Intent intent = new Intent(ACTION_USB_PERMISSION);
+            intent.setPackage(context.getPackageName());
             PendingIntent permissionIntent = PendingIntent.getBroadcast(
-                    context, 0, new Intent(ACTION_USB_PERMISSION), flags);
+                    context, 0, intent, flags);
             manager.requestPermission(device, permissionIntent);
             return;
         }

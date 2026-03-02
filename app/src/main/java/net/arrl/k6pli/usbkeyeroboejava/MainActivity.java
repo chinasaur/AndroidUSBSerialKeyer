@@ -33,7 +33,6 @@ import android.widget.SeekBar;
 import net.arrl.k6pli.usbkeyeroboejava.databinding.ActivityMainBinding;
 
 public class MainActivity extends AppCompatActivity implements SharedPreferences.OnSharedPreferenceChangeListener {
-//    private static final String TAG = "K6PLI Keyer";
     private SharedPreferences sharedPrefs;
     private ActivityMainBinding binding;
     private UsbSerialManager usbSerialManager;
