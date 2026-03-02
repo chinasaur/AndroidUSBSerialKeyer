@@ -18,6 +18,13 @@
             app:entryValues="@array/sidetone_modes_values"
             android:defaultValue="auto"
             app:useSimpleSummaryProvider="true" />
+
+        <EditTextPreference
+            app:key="sidetone_frequency"
+            app:title="Sidetone Frequency"
+            app:useSimpleSummaryProvider="true"
+            android:defaultValue="700"
+            android:inputType="number" />
     </PreferenceCategory>
 
 </PreferenceScreen>

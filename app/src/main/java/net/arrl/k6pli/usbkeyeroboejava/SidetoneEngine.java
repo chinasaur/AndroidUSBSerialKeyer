@@ -52,6 +52,7 @@ public class SidetoneEngine {
     static native void setDefaultStreamValues(int sampleRate, int framesPerBurst);
     static native int startEngine(int audioApi, int deviceId, float frequency);
     static native int stopEngine();
+    static native void setFrequency(float frequency);
     private static native void playSidetoneNative();
     private static native void playSilenceNative();
 }

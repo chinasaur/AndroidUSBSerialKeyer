@@ -125,11 +125,13 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
         super.onResume();
         sharedPrefs.registerOnSharedPreferenceChangeListener(this);
         SidetoneEngine.setDefaultStreamValues(this);
-        SidetoneEngine.startEngine(
-                0, 0,  // Unspecified; pick the best API and OS default audio device.
-                700.f);
+
+        int frequency = getSidetoneFrequency();
+        SidetoneEngine.startEngine(0, 0, frequency);
+
         usbSerialManager.registerReceiver();
         usbSerialManager.open();
+
         refreshUiFromPrefs();
         setupKeyer();
         updateSidetoneState();
@@ -139,9 +141,7 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
     protected void onPause() {
         sharedPrefs.unregisterOnSharedPreferenceChangeListener(this);
         SidetoneEngine.stopEngine();
-        if (keyer != null) {
-            keyer.stop();
-        }
+        if (keyer != null) keyer.stop();
         usbSerialManager.unregisterReceiver();
         usbSerialManager.close();
         super.onPause();
@@ -176,6 +176,15 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
         SidetoneEngine.setSidetoneEnabled(enabled);
     }
 
+    private int getSidetoneFrequency() {
+        try {
+            String freqStr = sharedPrefs.getString("sidetone_frequency", "700");
+            return Integer.parseInt(freqStr);
+        } catch (NumberFormatException e) {
+            return 700;
+        }
+    }
+
     @Override
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
         if ("sidetone_mode".equals(key)) {
@@ -183,6 +192,8 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
         } else if ("usb_device".equals(key)) {
             usbSerialManager.open();
             updateSidetoneState();
+        } else if ("sidetone_frequency".equals(key)) {
+            SidetoneEngine.setFrequency(getSidetoneFrequency());
         }
     }
 

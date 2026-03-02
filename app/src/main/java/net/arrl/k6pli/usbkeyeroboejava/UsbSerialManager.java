@@ -107,22 +107,28 @@ public class UsbSerialManager {
     protected void open() {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
         String preferredDeviceName = prefs.getString("usb_device", null);
-        if (VALUE_DISABLED.equals(preferredDeviceName)) return;
+        
+        // If disabled or no selection, ensure we are closed
+        if (VALUE_DISABLED.equals(preferredDeviceName) || preferredDeviceName == null) {
+            close();
+            return;
+        }
 
         List<UsbSerialDriver> drivers = getAvailableDrivers();
-        if (drivers.isEmpty()) return;
+        if (drivers.isEmpty()) {
+            close();
+            return;
+        }
 
         UsbSerialDriver driverToOpen = null;
-        if (preferredDeviceName != null) {
-            for (UsbSerialDriver driver : drivers) {
-                if (driver.getDevice().getDeviceName().equals(preferredDeviceName)) {
-                    driverToOpen = driver;
-                    break;
-                }
+        for (UsbSerialDriver driver : drivers) {
+            if (driver.getDevice().getDeviceName().equals(preferredDeviceName)) {
+                driverToOpen = driver;
+                break;
             }
         }
 
-        // Fallback to first available if preferred not found or not set
+        // Fallback to first available if preferred not found
         if (driverToOpen == null) {
             driverToOpen = drivers.get(0);
         }
@@ -147,8 +153,13 @@ public class UsbSerialManager {
 
         if (!manager.hasPermission(device)) {
             Log.d(TAG, "Requesting permission for device " + device.getDeviceName());
+            // Use FLAG_MUTABLE as some UsbManager implementations need to modify the Intent
+            int flags = PendingIntent.FLAG_UPDATE_CURRENT;
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                flags |= PendingIntent.FLAG_MUTABLE;
+            }
             PendingIntent permissionIntent = PendingIntent.getBroadcast(
-                    context, 0, new Intent(ACTION_USB_PERMISSION), PendingIntent.FLAG_IMMUTABLE);
+                    context, 0, new Intent(ACTION_USB_PERMISSION), flags);
             manager.requestPermission(device, permissionIntent);
             return;
         }
@@ -179,13 +190,22 @@ public class UsbSerialManager {
     public void close() {
         if (serialPort != null) {
             try {
-                if (serialPort.isOpen()) serialPort.close();
-            } catch (IOException ignored) {}
-            serialPort = null;
+                // Always attempt to close the port to release internal resources like UsbRequests
+                serialPort.close();
+            } catch (Exception e) {
+                Log.d(TAG, "Error closing serial port: " + e.getMessage());
+            } finally {
+                serialPort = null;
+            }
         }
         if (usbConnection != null) {
-            usbConnection.close();
-            usbConnection = null;
+            try {
+                usbConnection.close();
+            } catch (Exception e) {
+                Log.d(TAG, "Error closing USB connection: " + e.getMessage());
+            } finally {
+                usbConnection = null;
+            }
         }
     }
 

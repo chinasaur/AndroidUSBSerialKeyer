@@ -98,6 +98,7 @@ public:
     oboe::Result stop();
     void playSidetone();
     void playSilence();
+    void setFrequency(float frequency);
 
     void onErrorAfterClose(oboe::AudioStream *oboeStream, oboe::Result error) override;
 

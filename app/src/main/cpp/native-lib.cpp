@@ -49,6 +49,14 @@ Java_net_arrl_k6pli_usbkeyeroboejava_SidetoneEngine_stopEngine(
 }
 
 JNIEXPORT void JNICALL
+Java_net_arrl_k6pli_usbkeyeroboejava_SidetoneEngine_setFrequency(
+        JNIEnv *env,
+        jclass,
+        jfloat frequency) {
+    sidetoneEngine.setFrequency(frequency);
+}
+
+JNIEXPORT void JNICALL
 Java_net_arrl_k6pli_usbkeyeroboejava_SidetoneEngine_playSidetoneNative(
         JNIEnv *env,
         jclass) {

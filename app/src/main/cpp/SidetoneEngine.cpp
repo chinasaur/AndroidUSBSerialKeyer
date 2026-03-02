@@ -34,6 +34,7 @@ oboe::Result SidetoneEngine::openPlaybackStream(int32_t device_id, oboe::AudioAp
             ->setAudioApi(audio_api)
             ->setChannelCount(1)
             ->setDeviceId(device_id)
+            ->setAttributionTag("sidetone_audio")
             ->openStream(mStream);
 }
 
@@ -61,7 +62,7 @@ oboe::Result SidetoneEngine::start(oboe::AudioApi audio_api, int32_t device_id, 
 
             mAudioSource = std::make_shared<SidetoneOscillator>();
             mAudioSource->setSampleRate(mStream->getSampleRate());
-            mAudioSource->setFrequency(frequency);
+            mAudioSource->setFrequency(mFrequency);
             mAudioSource->setAmplitude(1.f);
             mDataCallback->setSource(mAudioSource);
 
@@ -97,6 +98,14 @@ void SidetoneEngine::playSidetone() {
 
 void SidetoneEngine::playSilence() {
     if (mAudioSource) mAudioSource->setWaveOn(false);
+}
+
+void SidetoneEngine::setFrequency(float frequency) {
+    std::lock_guard<std::mutex> lock(mLock);
+    mFrequency = frequency;
+    if (mAudioSource) {
+        mAudioSource->setFrequency(mFrequency);
+    }
 }
 
 void SidetoneEngine::onErrorAfterClose(oboe::AudioStream *oboeStream, oboe::Result error) {
