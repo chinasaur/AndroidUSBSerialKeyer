@@ -17,69 +17,107 @@
 package net.arrl.k6pli.usbkeyeroboejava;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.preference.PreferenceManager;
 
 import android.annotation.SuppressLint;
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.SeekBar;
 
 import net.arrl.k6pli.usbkeyeroboejava.databinding.ActivityMainBinding;
 
-
 public class MainActivity extends AppCompatActivity {
-    private static final String TAG = "K6PLI Keyer";
+//    private static final String TAG = "K6PLI Keyer";
+    private SharedPreferences sharedPrefs;
     private ActivityMainBinding binding;
     private UsbSerialManager usbSerialManager;
     private Keyer keyer;
-
-    private void setupKeyerTypeUI() {
-        binding.rgKeyerType.setOnCheckedChangeListener((group, checkedId) -> {
-            if (binding.rgKeyerType.getCheckedRadioButtonId() == R.id.rbIambicA) {
-                binding.llWPM.setVisibility(View.VISIBLE);
-            } else {
-                binding.llWPM.setVisibility(View.INVISIBLE);
-            }
-            setupKeyer();
-        });
-    }
-
-    private void setupWPM() {
-        binding.sbWPM.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-            @SuppressLint("SetTextI18n")
-            @Override
-            public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
-                binding.tvWPM.setText(i + " WPM");
-                setupKeyer();
-            }
-            @Override public void onStartTrackingTouch(SeekBar seekBar) {}
-            @Override public void onStopTrackingTouch(SeekBar seekBar) {}
-        });
-    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         binding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
-        setupKeyerTypeUI();
-        setupWPM();
+
+        sharedPrefs = PreferenceManager.getDefaultSharedPreferences(this);
         usbSerialManager = new UsbSerialManager(this);
+        setupKeyerControls();
     }
 
-    private void resetButtons() {
-        binding.bStraightKey.setVisibility(View.INVISIBLE);
-        binding.bLeftPaddle.setVisibility(View.INVISIBLE);
-        binding.bRightPaddle.setVisibility(View.INVISIBLE);
-        binding.bLeftPaddle.setText("");
-        binding.bRightPaddle.setText("");
+    private void setupKeyerControls() {
+        String[] entries = getResources().getStringArray(R.array.keyer_modes);
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(this,
+                android.R.layout.simple_spinner_item, entries);
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        binding.spKeyerType.setAdapter(adapter);
+
+        binding.spKeyerType.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                String[] entryValues = getResources().getStringArray(R.array.keyer_modes_values);
+                String valueToSave = entryValues[position];
+                String currentPref = sharedPrefs.getString("keyer_mode", "straight");
+                if (!valueToSave.equals(currentPref)) {
+                    sharedPrefs.edit().putString("keyer_mode", valueToSave).apply();
+                    updateWpmVisibility(valueToSave);
+                    setupKeyer();
+                }
+            }
+            @Override public void onNothingSelected(AdapterView<?> parent) {}
+        });
+
+        binding.sbWPM.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @SuppressLint("SetTextI18n")
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                // Enforce minimum WPM for backward compatibility (API < 26)
+                if (progress < 5) {
+                    progress = 5;
+                    seekBar.setProgress(5);
+                }
+
+                if (fromUser) {
+                    sharedPrefs.edit().putInt("keyer_wpm", progress).apply();
+                }
+                binding.tvWPM.setText(progress + " WPM");
+                setupKeyer();
+            }
+            @Override public void onStartTrackingTouch(SeekBar seekBar) {}
+            @Override public void onStopTrackingTouch(SeekBar seekBar) {}
+        });
+
+        refreshUiFromPrefs();
     }
 
-    private void setupKeyer() {
-        resetButtons();
-        if (keyer != null) keyer.stop();
-        keyer = Keyer.buildKeyer(binding, usbSerialManager, binding.sbWPM.getProgress());
-        keyer.setupButtons(binding);
-        new Thread(keyer).start();
+    private void refreshUiFromPrefs() {
+        String savedValue = sharedPrefs.getString("keyer_mode", "straight");
+        String[] entryValues = getResources().getStringArray(R.array.keyer_modes_values);
+        int index = -1;
+        for (int i = 0; i < entryValues.length; ++i) {
+            if (entryValues[i].equals(savedValue)) {
+                index = i;
+                break;
+            }
+        }
+        if (index != -1) {
+            binding.spKeyerType.setSelection(index);
+        }
+        updateWpmVisibility(savedValue);
+        
+        int savedSpeed = sharedPrefs.getInt("keyer_wpm", 20);
+        binding.sbWPM.setProgress(savedSpeed);
+        binding.tvWPM.setText(savedSpeed + " WPM");
+    }
+
+    private void updateWpmVisibility(String mode) {
+        int visibility = mode.equals("straight") ? View.INVISIBLE : View.VISIBLE;
+        binding.llWPM.setVisibility(visibility);
     }
 
     @Override
@@ -90,14 +128,43 @@ public class MainActivity extends AppCompatActivity {
                 0, 0,  // Unspecified; pick the best API and OS default audio device.
                 700.f);
         usbSerialManager.open();
+        refreshUiFromPrefs();
         setupKeyer();
     }
 
     @Override
     protected void onPause() {
         SidetoneEngine.stopEngine();
-        keyer.stop();
+        if (keyer != null) {
+            keyer.stop();
+        }
         usbSerialManager.close();
         super.onPause();
+    }
+
+    private void setupKeyer() {
+        if (keyer != null) keyer.stop();
+        String[] entryValues = getResources().getStringArray(R.array.keyer_modes_values);
+        int selectedIndex = binding.spKeyerType.getSelectedItemPosition();
+        String selectedValue = (selectedIndex >= 0 && selectedIndex < entryValues.length)
+                ? entryValues[selectedIndex] : "straight";
+        keyer = Keyer.buildKeyer(selectedValue, usbSerialManager, binding.sbWPM.getProgress());
+        keyer.setupButtons(binding);
+        new Thread(keyer).start();
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.main_menu, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (item.getItemId() == R.id.action_settings) {
+            startActivity(new Intent(this, SettingsActivity.class));
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
     }
 }

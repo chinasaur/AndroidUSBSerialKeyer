@@ -26,12 +26,11 @@ import net.arrl.k6pli.usbkeyeroboejava.databinding.ActivityMainBinding;
 
 abstract public class Keyer implements Runnable {
     public static Keyer buildKeyer(
-            ActivityMainBinding binding, UsbSerialManager usbSerialManager, int wordsPerMinute) {
-        final int checkedId = binding.rgKeyerType.getCheckedRadioButtonId();
-        if (checkedId == R.id.rbStraightKey) {
-            return new StraightKey(usbSerialManager);
-        } else if (checkedId == R.id.rbIambicA) {
+            String keyerType, UsbSerialManager usbSerialManager, int wordsPerMinute) {
+        if ("iambic_a".equals(keyerType)) {
             return new IambicA(usbSerialManager, wordsPerMinute);
+        } else if ("straight".equals(keyerType)) {
+            return new StraightKey(usbSerialManager);
         } else {
             return new StraightKey(usbSerialManager);
         }
@@ -45,6 +44,15 @@ abstract public class Keyer implements Runnable {
 
     public void run() {}
     public void stop() {}
+
+    public void resetButtons(ActivityMainBinding binding) {
+        binding.bStraightKey.setVisibility(View.INVISIBLE);
+        binding.bLeftPaddle.setVisibility(View.INVISIBLE);
+        binding.bRightPaddle.setVisibility(View.INVISIBLE);
+        binding.bLeftPaddle.setText("");
+        binding.bRightPaddle.setText("");
+    }
+
     public abstract void setupButtons(ActivityMainBinding binding);
 
     public void keyDown() {
@@ -65,6 +73,7 @@ class StraightKey extends Keyer {
     @SuppressLint("ClickableViewAccessibility")
     @Override
     public void setupButtons(ActivityMainBinding binding) {
+        resetButtons(binding);
         binding.bStraightKey.setVisibility(View.VISIBLE);
         binding.bLeftPaddle.setVisibility(View.INVISIBLE);
         binding.bRightPaddle.setVisibility(View.INVISIBLE);
@@ -91,6 +100,7 @@ class Cootie extends Keyer {
     @SuppressLint("ClickableViewAccessibility")
     @Override
     public void setupButtons(ActivityMainBinding binding) {
+        resetButtons(binding);
         binding.bLeftPaddle.setVisibility(View.VISIBLE);
         binding.bRightPaddle.setVisibility(View.VISIBLE);
         View.OnTouchListener listener = (v, event) -> {
@@ -152,6 +162,7 @@ abstract class PaddleKeyer extends Keyer {
     @SuppressLint("ClickableViewAccessibility")
     @Override
     public void setupButtons(ActivityMainBinding binding) {
+        resetButtons(binding);
         binding.bLeftPaddle.setVisibility(View.VISIBLE);
         binding.bRightPaddle.setVisibility(View.VISIBLE);
         binding.bLeftPaddle.setText(".");

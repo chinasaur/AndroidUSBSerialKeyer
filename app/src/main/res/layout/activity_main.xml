@@ -85,24 +85,11 @@
             android:text="Keyer Type"
             android:textSize="20sp" />
 
-        <RadioGroup
-            android:id="@+id/rgKeyerType"
+        <Spinner
+            android:id="@+id/spKeyerType"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:checkedButton="@+id/rbStraightKey">
-
-            <RadioButton
-                android:id="@+id/rbStraightKey"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Straight Key" />
-
-            <RadioButton
-                android:id="@+id/rbIambicA"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Iambic A Paddle" />
-        </RadioGroup>
+            android:padding="8dp" />
     </LinearLayout>
 
     <LinearLayout
@@ -127,6 +114,7 @@
             style="@style/Widget.AppCompat.SeekBar"
             android:layout_width="match_parent"
             android:layout_height="37dp"
+            android:min="5"
             android:max="40"
             android:progress="20" />
 

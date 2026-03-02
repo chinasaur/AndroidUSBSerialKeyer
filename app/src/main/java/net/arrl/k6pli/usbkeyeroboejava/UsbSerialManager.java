@@ -45,9 +45,8 @@ public class UsbSerialManager {
         // Find all available drivers from attached devices.
         UsbManager manager = (UsbManager) context.getSystemService(Context.USB_SERVICE);
         List<UsbSerialDriver> availableDrivers = UsbSerialProber.getDefaultProber().findAllDrivers(manager);
-        if (availableDrivers.isEmpty()) {
-            return;
-        }
+        if (availableDrivers.isEmpty()) return;
+
         // Open a connection to the first available driver.
         UsbSerialDriver driver = availableDrivers.get(0);
         PendingIntent permissionIntent = PendingIntent.getBroadcast(
@@ -58,6 +57,7 @@ public class UsbSerialManager {
             Log.w(TAG, "USB connection permission not granted");
             return;
         }
+
         // Open serial port.
         serialPort = driver.getPorts().get(0); // Most devices have just one port (port 0)
         try {

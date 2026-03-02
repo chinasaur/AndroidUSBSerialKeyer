@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="keyer_modes">
+        <item>Straight Key</item>
+        <item>Iambic Mode A</item>
+    </string-array>
+
+    <string-array name="keyer_modes_values">
+        <item>straight</item>
+        <item>iambic_a</item>
+    </string-array>
+</resources>
