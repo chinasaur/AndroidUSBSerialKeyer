@@ -2,7 +2,11 @@ package net.arrl.k6pli.usbkeyeroboejava;
 
 import android.hardware.usb.UsbDevice;
 import android.os.Bundle;
+import android.text.InputType;
+import android.widget.EditText;
 
+import androidx.annotation.NonNull;
+import androidx.preference.EditTextPreference;
 import androidx.preference.ListPreference;
 import androidx.preference.PreferenceFragmentCompat;
 
@@ -48,6 +52,14 @@ public class SettingsFragment extends PreferenceFragmentCompat {
             
             // Initial population to ensure correct summary/state when the fragment is created
             updateUsbDeviceList(usbDevicePref);
+        }
+
+        EditTextPreference frequencyPref = findPreference("sidetone_frequency");
+        if (frequencyPref != null) {
+            frequencyPref.setOnBindEditTextListener(editText -> {
+                editText.setInputType(InputType.TYPE_CLASS_NUMBER);
+                editText.selectAll();
+            });
         }
     }
 
