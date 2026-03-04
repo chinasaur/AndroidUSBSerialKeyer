@@ -23,8 +23,6 @@ import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -47,6 +45,9 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
         sharedPrefs = PreferenceManager.getDefaultSharedPreferences(this);
         usbSerialManager = UsbSerialManager.getInstance(this);
         setupKeyerControls();
+        
+        binding.ibSettings.setOnClickListener(v -> 
+                startActivity(new Intent(this, SettingsActivity.class)));
     }
 
     private void setupKeyerControls() {
@@ -114,8 +115,8 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
         binding.tvWPM.setText(savedSpeed + " WPM");
     }
 
-    private void updateWpmVisibility(String mode) {
-        int visibility = mode.equals("straight") ? View.INVISIBLE : View.VISIBLE;
+    private void updateWpmVisibility(String keyer_mode) {
+        int visibility = keyer_mode.equals("straight") ? View.INVISIBLE : View.VISIBLE;
         binding.llWPM.setVisibility(visibility);
     }
 
@@ -194,20 +195,5 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
         } else if ("sidetone_frequency".equals(key)) {
             SidetoneEngine.setFrequency(getSidetoneFrequency());
         }
-    }
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.main_menu, menu);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        if (item.getItemId() == R.id.action_settings) {
-            startActivity(new Intent(this, SettingsActivity.class));
-            return true;
-        }
-        return super.onOptionsItemSelected(item);
     }
 }

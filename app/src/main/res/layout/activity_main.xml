@@ -6,6 +6,20 @@
     android:layout_height="match_parent"
     tools:context=".MainActivity">
 
+    <ImageButton
+        android:id="@+id/ibSettings"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_marginTop="64dp"
+        android:layout_marginEnd="16dp"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:contentDescription="Settings"
+        android:scaleType="fitCenter"
+        android:src="@drawable/ic_settings"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:tint="#888888" />
+
     <Button
         android:id="@+id/bStraightKey"
         android:layout_width="0dp"
@@ -72,7 +86,7 @@
         android:id="@+id/llKeyerType"
         android:layout_width="0dp"
         android:layout_height="160dp"
-        android:layout_marginTop="64dp"
+        android:layout_marginTop="160dp"
         android:orientation="vertical"
         app:layout_constraintEnd_toEndOf="@+id/bStraightKey"
         app:layout_constraintStart_toStartOf="@+id/bStraightKey"
