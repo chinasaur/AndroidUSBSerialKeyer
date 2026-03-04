@@ -29,8 +29,6 @@ abstract public class Keyer implements Runnable {
             String keyerType, UsbSerialManager usbSerialManager, int wordsPerMinute) {
         if ("iambic_a".equals(keyerType)) {
             return new IambicA(usbSerialManager, wordsPerMinute);
-        } else if ("straight".equals(keyerType)) {
-            return new StraightKey(usbSerialManager);
         } else {
             return new StraightKey(usbSerialManager);
         }
@@ -75,14 +73,13 @@ class StraightKey extends Keyer {
     public void setupButtons(ActivityMainBinding binding) {
         resetButtons(binding);
         binding.bStraightKey.setVisibility(View.VISIBLE);
-        binding.bLeftPaddle.setVisibility(View.INVISIBLE);
-        binding.bRightPaddle.setVisibility(View.INVISIBLE);
         binding.bStraightKey.setOnTouchListener((v, event) -> {
             switch (event.getAction()) {
                 case (MotionEvent.ACTION_DOWN):
                     keyDown();
                     break;
                 case (MotionEvent.ACTION_UP):
+                case (MotionEvent.ACTION_CANCEL):
                     keyUp();
                     break;
             }
@@ -109,6 +106,7 @@ class Cootie extends Keyer {
                     keyDown();
                     break;
                 case (MotionEvent.ACTION_UP):
+                case (MotionEvent.ACTION_CANCEL):
                     keyUp();
                     break;
             }
@@ -173,6 +171,7 @@ abstract class PaddleKeyer extends Keyer {
                     ditOn();
                     break;
                 case (MotionEvent.ACTION_UP):
+                case (MotionEvent.ACTION_CANCEL):
                     ditOff();
                     break;
             }
@@ -184,6 +183,7 @@ abstract class PaddleKeyer extends Keyer {
                     dahOn();
                     break;
                 case (MotionEvent.ACTION_UP):
+                case (MotionEvent.ACTION_CANCEL):
                     dahOff();
                     break;
             }
