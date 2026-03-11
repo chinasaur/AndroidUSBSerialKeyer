@@ -1,4 +1,4 @@
 <resources>
-    <string name="app_name">K6PLI Keyer</string>
+    <string name="app_name">USB Keyer</string>
     <string name="sidetone_attribution_label">Sidetone Audio Processing</string>
 </resources>

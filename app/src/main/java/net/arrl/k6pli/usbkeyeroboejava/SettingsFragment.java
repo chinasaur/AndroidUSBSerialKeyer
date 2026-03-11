@@ -1,6 +1,8 @@
 package net.arrl.k6pli.usbkeyeroboejava;
 
+import android.content.Intent;
 import android.hardware.usb.UsbDevice;
+import android.net.Uri;
 import android.os.Bundle;
 import android.text.InputType;
 import android.widget.EditText;
@@ -8,6 +10,7 @@ import android.widget.EditText;
 import androidx.annotation.NonNull;
 import androidx.preference.EditTextPreference;
 import androidx.preference.ListPreference;
+import androidx.preference.Preference;
 import androidx.preference.PreferenceFragmentCompat;
 
 import com.hoho.android.usbserial.driver.UsbSerialDriver;
@@ -58,7 +61,16 @@ public class SettingsFragment extends PreferenceFragmentCompat {
         if (frequencyPref != null) {
             frequencyPref.setOnBindEditTextListener(editText -> {
                 editText.setInputType(InputType.TYPE_CLASS_NUMBER);
-                editText.selectAll();
+                editText.selectAll(); // Highlight existing text
+            });
+        }
+
+        Preference githubPref = findPreference("github_link");
+        if (githubPref != null) {
+            githubPref.setOnPreferenceClickListener(preference -> {
+                Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/chinasaur/AndroidUSBSerialKeyer"));
+                startActivity(intent);
+                return true;
             });
         }
     }

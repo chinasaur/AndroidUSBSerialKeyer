@@ -27,4 +27,17 @@
             android:inputType="number" />
     </PreferenceCategory>
 
+    <PreferenceCategory app:title="About">
+        <Preference
+            app:key="about_app"
+            app:title="@string/app_name"
+            app:summary="© 2026 Peter K6PLI\nLicensed under Apache License 2.0"
+            app:selectable="false" />
+
+        <Preference
+            app:key="github_link"
+            app:title="View on GitHub"
+            app:summary="https://github.com/chinasaur/AndroidUSBSerialKeyer" />
+    </PreferenceCategory>
+
 </PreferenceScreen>

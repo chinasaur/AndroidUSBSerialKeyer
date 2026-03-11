@@ -4,7 +4,7 @@
     android:viewportWidth="108"
     android:viewportHeight="108">
 
-    <!-- USB Trident (Scrunched further towards center) -->
+    <!-- USB Trident -->
     <group
         android:translateX="42"
         android:translateY="30"
@@ -31,20 +31,29 @@
             android:pathData="M9.5,12.5 h5 v5 h-5 z" />
     </group>
 
-    <!-- Telegraph Key Base (Moved further up and scrunched) -->
+    <!-- Telegraph Key Base -->
     <path
         android:fillColor="#FFFFFF"
         android:pathData="M52,65 h22 v4 h-22 z" />
+
+    <!-- Pivot Junction (Fillet) -->
+    <group
+        android:translateX="0"
+        android:translateY="-2.5">
+        <path
+            android:fillColor="#FFFFFF"
+            android:pathData="M54,67.5 m-2,0 a2,2 0 1,0 4,0 a2,2 0 1,0 -4,0" />
+    </group>
 
     <!-- Key Lever -->
     <path
         android:fillColor="#FFFFFF"
         android:pathData="M54,63 l14,-4 v2 l-14,4 z" />
 
-    <!-- Radio Waves and Knob Group (Moved further left and scrunched) -->
+    <!-- Radio Waves and Knob Group -->
     <group
         android:translateX="68"
-        android:translateY="54"
+        android:translateY="57"
         android:scaleX="0.75"
         android:scaleY="0.75"
         android:rotation="-45">
